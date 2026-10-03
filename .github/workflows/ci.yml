@@ -44,7 +44,7 @@ jobs:
         run: composer format:check
       - name: Save resolved dependencies and test report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: laravel-${{ matrix.laravel_major }}-php-${{ matrix.php }}
           path: |
