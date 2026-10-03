@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compatibility:
+    name: Laravel ${{ matrix.laravel_major }} / PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { laravel_major: 11, laravel: '^11.0', testbench: '^9.0', php: '8.3' }
+          - { laravel_major: 11, laravel: '^11.0', testbench: '^9.0', php: '8.4' }
+          - { laravel_major: 12, laravel: '^12.0', testbench: '^10.0', php: '8.3' }
+          - { laravel_major: 12, laravel: '^12.0', testbench: '^10.0', php: '8.4' }
+          - { laravel_major: 12, laravel: '^12.0', testbench: '^10.0', php: '8.5' }
+          - { laravel_major: 13, laravel: '^13.0', testbench: '^11.0', php: '8.3' }
+          - { laravel_major: 13, laravel: '^13.0', testbench: '^11.0', php: '8.4' }
+          - { laravel_major: 13, laravel: '^13.0', testbench: '^11.0', php: '8.5' }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, pdo_sqlite
+          tools: composer:v2
+          coverage: none
+      - name: Validate package metadata
+        run: composer validate --strict --no-check-lock
+      - name: Resolve selected framework independently
+        run: composer update --no-interaction --prefer-dist --with='laravel/framework:${{ matrix.laravel }}' --with='orchestra/testbench:${{ matrix.testbench }}' --with-all-dependencies
+      - name: Test
+        run: composer test -- --log-junit test-results.xml
+      - name: Static analysis
+        run: composer analyse
+      - name: Code style
+        run: composer format:check
+      - name: Save resolved dependencies and test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: laravel-${{ matrix.laravel_major }}-php-${{ matrix.php }}
+          path: |
+            composer.lock
+            test-results.xml
+          retention-days: 7

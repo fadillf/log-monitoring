@@ -1,0 +1,34 @@
+# Composer
+/vendor/
+/composer.lock
+
+# PHPUnit
+/.phpunit.cache/
+/.phpunit.result.cache
+/test-results.xml
+/coverage/
+
+# PHPStan
+/.phpstan.cache/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# IDE
+/.idea/
+/.vscode/
+
+# macOS
+.DS_Store
+
+# Temporary files
+*.log
+*.tmp
+*.swp
+
+# PHP tooling caches
+/.php-cs-fixer.cache
+/.phpunit.cache
+/.phpstan.cache
